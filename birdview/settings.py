@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'birdview',
 
     # third party apps
-
+    'django_extensions'
 ]
 
 MIDDLEWARE = [
