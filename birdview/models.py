@@ -25,7 +25,7 @@ class Item(TimeStampedModel):
     gender = models.CharField('성별', max_length=6, choices=GenderChoices.choices)
     category = models.CharField('카테고리', max_length=10, choices=CategoryChoices.choices)
     # TODO - Ingredients 모델 생성 후, FK 설정
-    ingredient = models.TextField('구성 성분 이름')
+    ingredient_set = models.ManyToManyField('Ingredient', related_name='items')
     monthly_sales = models.PositiveIntegerField('이번달 판매 수량', default=0)
 
     IMAGE_BASE_URL = 'https://grepp-programmers-challenges.s3.ap-northeast-2.amazonaws.com/2020-birdview'
@@ -43,3 +43,13 @@ class Item(TimeStampedModel):
         return os.path.join(self.IMAGE_BASE_URL, 'thumbnail', self.image_file_name)
 
 
+class Ingredient(TimeStampedModel):
+    class EffectBySkinType(DjangoChoices):
+        beneficial = ChoiceItem('O')
+        harmful = ChoiceItem('X')
+        no_effect = ChoiceItem('')
+
+    name = models.CharField('성분명', max_length=100, unique=True)
+    oily = models.CharField('지성 영향', max_length=1, choices=EffectBySkinType.choices)
+    dry = models.CharField('건성 영향', max_length=1, choices=EffectBySkinType.choices)
+    sensitive = models.CharField('민감성 영향', max_length=1, choices=EffectBySkinType.choices)
