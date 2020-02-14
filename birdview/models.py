@@ -42,6 +42,10 @@ class Item(TimeStampedModel):
     def thumbnail_image_url(self):
         return os.path.join(self.IMAGE_BASE_URL, 'thumbnail', self.image_file_name)
 
+    @property
+    def ingredients(self):
+        return ','.join(self.ingredient_set.all().values_list('name', flat=True))
+
 
 class Ingredient(TimeStampedModel):
     class EffectBySkinType(DjangoChoices):
