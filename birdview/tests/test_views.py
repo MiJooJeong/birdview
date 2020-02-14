@@ -21,17 +21,17 @@ class ItemListViewsetTest(TestCase):
             image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
             monthly_sales=5196
         )
-        sample_item.ingredient.add(sample_ingredient)
+        sample_item.ingredient_set.add(sample_ingredient)
 
         client = APIClient()
         response = client.get('/products/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['name'], sample_item.name)
-        self.assertEqual(response.data[0]['imgUrl'], sample_item.thumbnail_image_url)
         self.assertEqual(response.data[0]['price'], sample_item.price)
-        self.assertEqual(response.data[0]['ingredient'][0], sample_ingredient.id)
+        self.assertEqual(response.data[0]['imgUrl'], sample_item.thumbnail_image_url)
         self.assertEqual(response.data[0]['monthlySales'], sample_item.monthly_sales)
+        self.assertEqual(response.data[0]['ingredients'][0], sample_ingredient.id)
 
         sample_item.delete()
         sample_ingredient.delete()

@@ -1,19 +1,27 @@
 from django.test import TestCase
+
+from birdview.models import Ingredient
 from birdview.models import Item
 
 
 class ItemModelTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.sample_ingredient = Ingredient.objects.create(
+            name="foundation",
+            oily="",
+            dry="",
+            sensitive="O"
+        )
         cls.sample_item = Item.objects.create(
             name='리더스 링클 콜라겐 마스크',
             price=520,
             image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
             gender=Item.GenderChoices.female,
             category=Item.CategoryChoices.skincare,
-            ingredient='executrix,provision,multimedia,destruction,screw',
             monthly_sales=5196
         )
+        cls.sample_item.ingredient_set.add(cls.sample_ingredient)
 
     def test_image_file_name(self):
         self.assertEqual(
