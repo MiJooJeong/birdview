@@ -49,7 +49,7 @@ class Ingredient(TimeStampedModel):
         harmful = ChoiceItem('X')
         no_effect = ChoiceItem('')
 
-    name = models.CharField('성분명', max_length=100, unique=True)
+    name = models.CharField('성분명', max_length=100)
     oily = models.CharField('지성 영향', max_length=1, choices=EffectBySkinType.choices)
     dry = models.CharField('건성 영향', max_length=1, choices=EffectBySkinType.choices)
     sensitive = models.CharField('민감성 영향', max_length=1, choices=EffectBySkinType.choices)
