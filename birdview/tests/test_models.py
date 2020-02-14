@@ -7,9 +7,15 @@ from birdview.models import Item
 class ItemModelTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.sample_ingredient = Ingredient.objects.create(
+        cls.sample_ingredient_1 = Ingredient.objects.create(
             name="foundation",
             oily="",
+            dry="",
+            sensitive="O"
+        )
+        cls.sample_ingredient_2 = Ingredient.objects.create(
+            name="jurisdiction",
+            oily="X",
             dry="",
             sensitive="O"
         )
@@ -21,7 +27,8 @@ class ItemModelTestCase(TestCase):
             category=Item.CategoryChoices.skincare,
             monthly_sales=5196
         )
-        cls.sample_item.ingredient_set.add(cls.sample_ingredient)
+        cls.sample_item.ingredient_set.add(cls.sample_ingredient_1)
+        cls.sample_item.ingredient_set.add(cls.sample_ingredient_2)
 
     def test_image_file_name(self):
         self.assertEqual(
@@ -38,4 +45,19 @@ class ItemModelTestCase(TestCase):
         self.assertEqual(
             self.sample_item.thumbnail_image_url,
             'https://grepp-programmers-challenges.s3.ap-northeast-2.amazonaws.com/2020-birdview/thumbnail/a18de8cd-c730-4f36-b16f-665cca908c11.jpg'
+        )
+
+    def test_calculate_ingredient_score_of_oily_skin(self):
+        self.assertEqual(
+            self.sample_item.ingredient_score_of_oily_skin, -1
+        )
+
+    def test_calculate_ingredient_score_of_dry_skin(self):
+        self.assertEqual(
+            self.sample_item.ingredient_score_of_dry_skin, 0
+        )
+
+    def test_calculate_ingredient_score_of_sensitive_skin(self):
+        self.assertEqual(
+            self.sample_item.ingredient_score_of_sensitive_skin, 2
         )

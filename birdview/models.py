@@ -44,7 +44,44 @@ class Item(TimeStampedModel):
 
     @property
     def ingredients(self):
+        # TODO - serializer 설정으로 가능한지 확인 필요
         return ','.join(self.ingredient_set.all().values_list('name', flat=True))
+
+    @property
+    def ingredient_score_of_oily_skin(self) -> int:
+        ingredient_score = 0
+        for ingredient in self.ingredient_set.all():
+            if ingredient.oily == Ingredient.EffectBySkinType.beneficial:
+                ingredient_score += 1
+            elif ingredient.oily == Ingredient.EffectBySkinType.harmful:
+                ingredient_score -= 1
+            else:
+                pass
+        return ingredient_score
+
+    @property
+    def ingredient_score_of_dry_skin(self) -> int:
+        ingredient_score = 0
+        for ingredient in self.ingredient_set.all():
+            if ingredient.dry == Ingredient.EffectBySkinType.beneficial:
+                ingredient_score += 1
+            elif ingredient.dry == Ingredient.EffectBySkinType.harmful:
+                ingredient_score -= 1
+            else:
+                pass
+        return ingredient_score
+
+    @property
+    def ingredient_score_of_sensitive_skin(self) -> int:
+        ingredient_score = 0
+        for ingredient in self.ingredient_set.all():
+            if ingredient.sensitive == Ingredient.EffectBySkinType.beneficial:
+                ingredient_score += 1
+            elif ingredient.sensitive == Ingredient.EffectBySkinType.harmful:
+                ingredient_score -= 1
+            else:
+                pass
+        return ingredient_score
 
 
 class Ingredient(TimeStampedModel):

@@ -52,7 +52,6 @@ class ItemListViewsetTest(TestCase):
         self.assertEqual(len(response.data['results']), 50)
 
 
-
     def test_리스트를_형식에_맞게_보여준다(self):
         sample_ingredient_1 = Ingredient.objects.create(
             name="foundation",
