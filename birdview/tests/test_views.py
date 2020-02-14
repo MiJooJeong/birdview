@@ -35,3 +35,19 @@ class ItemListViewsetTest(TestCase):
 
         sample_item.delete()
         sample_ingredient.delete()
+
+    def test_상품_목록을_50개_단위로_페이징한다(self):
+        for i in range(1, 52):
+            Item.objects.create(
+                name='sample_item_{}'.format(i),
+                price=i,
+                image_id='a18de8cd-c730-4f36-b16f-665cca908c11_{}'.format(i),
+                monthly_sales=5196
+            )
+
+        client = APIClient()
+        response = client.get('/products/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 51)
+        self.assertEqual(len(response.data['results']), 50)
+
