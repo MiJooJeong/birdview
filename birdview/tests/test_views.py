@@ -177,3 +177,25 @@ class ItemListViewsetTest(TestCase):
         self.assertEqual(response.data['results'][0]['id'], sample_item_2.id)
         self.assertEqual(response.data['results'][1]['id'], sample_item_3.id)
         self.assertEqual(response.data['results'][2]['id'], sample_item_1.id)
+
+    def test_카테고리를_선택하면_선택한_카테고리의_아이템만_보여준다(self):
+        sample_item_1 = Item.objects.create(
+            name='리더스 링클 콜라겐 마스크',
+            price=520,
+            image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
+            monthly_sales=5196,
+            category=Item.CategoryChoices.skincare
+        )
+        sample_item_2 = Item.objects.create(
+            name='이켈 녹차 울트라 하이드레이팅 에센스 마스크',
+            price=4640,
+            image_id='1d532a02-1d50-4760-8e61-32b88b2a2271',
+            monthly_sales=2405,
+            category=Item.CategoryChoices.basemakeup
+        )
+
+        client = APIClient()
+        response = client.get('/products/?skin_type=oily&category=basemakeup', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['id'], sample_item_2.id)

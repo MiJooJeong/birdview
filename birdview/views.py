@@ -23,4 +23,8 @@ class ItemViewSet(viewsets.ReadOnlyModelViewSet):
         elif skin_type == 'sensitive':
             self.queryset = Item.objects.all().order_by('-ingredient_score_sensitive', 'price')
 
+        category = params.get('category')
+        if category:
+            self.queryset = Item.objects.filter(category=category)
+
         return super().list(request, *args, **kwargs)
