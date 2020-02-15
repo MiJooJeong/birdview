@@ -114,9 +114,9 @@ class ItemListViewsetTest(TestCase):
         client = APIClient()
         response = client.get('/products/?skin_type=oily', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['id'], sample_item_2.id)
-        self.assertEqual(response.data['results'][1]['id'], sample_item_3.id)
-        self.assertEqual(response.data['results'][2]['id'], sample_item_1.id)
+        self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)
+        self.assertEqual(response.data['results'][1]['name'], sample_item_3.name)
+        self.assertEqual(response.data['results'][2]['name'], sample_item_1.name)
 
     def test_건성_피부_타입에_대해_성분_점수가_높은_상품_순으로_정렬한다(self):
         sample_item_1 = Item.objects.create(
@@ -144,9 +144,9 @@ class ItemListViewsetTest(TestCase):
         client = APIClient()
         response = client.get('/products/?skin_type=dry', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['id'], sample_item_2.id)
-        self.assertEqual(response.data['results'][1]['id'], sample_item_3.id)
-        self.assertEqual(response.data['results'][2]['id'], sample_item_1.id)
+        self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)
+        self.assertEqual(response.data['results'][1]['name'], sample_item_3.name)
+        self.assertEqual(response.data['results'][2]['name'], sample_item_1.name)
 
     def test_민감성_피부_타입에_대해_성분_점수가_높은_상품_순으로_정렬한다(self):
         sample_item_1 = Item.objects.create(
@@ -174,9 +174,9 @@ class ItemListViewsetTest(TestCase):
         client = APIClient()
         response = client.get('/products/?skin_type=sensitive', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['id'], sample_item_2.id)
-        self.assertEqual(response.data['results'][1]['id'], sample_item_3.id)
-        self.assertEqual(response.data['results'][2]['id'], sample_item_1.id)
+        self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)
+        self.assertEqual(response.data['results'][1]['name'], sample_item_3.name)
+        self.assertEqual(response.data['results'][2]['name'], sample_item_1.name)
 
     def test_카테고리를_선택하면_선택한_카테고리의_아이템만_보여준다(self):
         sample_item_1 = Item.objects.create(
@@ -198,4 +198,55 @@ class ItemListViewsetTest(TestCase):
         response = client.get('/products/?skin_type=oily&category=basemakeup', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 1)
-        self.assertEqual(response.data['results'][0]['id'], sample_item_2.id)
+        self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)
+
+    def test_제외해야_하는_성분을_지정하면_제외하고_보여준다(self):
+        sample_ingredient_1 = Ingredient.objects.create(
+            name="foundation",
+            oily="",
+            dry="",
+            sensitive="O"
+        )
+        sample_ingredient_2 = Ingredient.objects.create(
+            name="jurisdiction",
+            oily="X",
+            dry="X",
+            sensitive="O"
+        )
+        sample_ingredient_3 = Ingredient.objects.create(
+            name="jurisdion",
+            oily="X",
+            dry="X",
+            sensitive="O"
+        )
+        sample_item_1 = Item.objects.create(
+            name='리더스 링클 콜라겐 마스크',
+            price=520,
+            image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
+            monthly_sales=5196,
+            category=Item.CategoryChoices.skincare
+        )
+        sample_item_2 = Item.objects.create(
+            name='이켈 녹차 울트라 하이드레이팅 에센스 마스크',
+            price=4640,
+            image_id='1d532a02-1d50-4760-8e61-32b88b2a2271',
+            monthly_sales=2405,
+            category=Item.CategoryChoices.basemakeup
+        )
+        sample_item_3 = Item.objects.create(
+            name='이켈 녹차 울트라 하이드레이팅 에센스 마스크2',
+            price=4640,
+            image_id='1d532a02-1d50-4760-8e61-32b88b2a22w71',
+            monthly_sales=2405,
+            category=Item.CategoryChoices.basemakeup
+        )
+        sample_item_1.ingredient_set.add(sample_ingredient_1)
+        sample_item_2.ingredient_set.add(sample_ingredient_2)
+        sample_item_3.ingredient_set.add(sample_ingredient_1)
+        sample_item_3.ingredient_set.add(sample_ingredient_3)
+
+        client = APIClient()
+        response = client.get('/products/?skin_type=oily&exclude_ingredient=foundation,jurisdion')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)

@@ -25,6 +25,13 @@ class ItemViewSet(viewsets.ReadOnlyModelViewSet):
 
         category = params.get('category')
         if category:
-            self.queryset = Item.objects.filter(category=category)
+            self.queryset = self.queryset.filter(category=category)
+
+        exclude_ingredient = params.get('exclude_ingredient')
+        if exclude_ingredient:
+            exclude_ingredient_list = exclude_ingredient.split(',')
+            for ingredient in exclude_ingredient_list:
+                self.queryset = self.queryset.exclude(ingredient_set__name=ingredient)
+
 
         return super().list(request, *args, **kwargs)
