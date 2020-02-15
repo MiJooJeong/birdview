@@ -27,6 +27,9 @@ class Item(TimeStampedModel):
     # TODO - Ingredients 모델 생성 후, FK 설정
     ingredient_set = models.ManyToManyField('Ingredient', related_name='items')
     monthly_sales = models.PositiveIntegerField('이번달 판매 수량', default=0)
+    ingredient_score_oily = models.IntegerField('지성 피부 성분 점수', default=0)
+    ingredient_score_dry = models.IntegerField('지성 피부 성분 점수', default=0)
+    ingredient_score_sensitive = models.IntegerField('지성 피부 성분 점수', default=0)
 
     IMAGE_BASE_URL = 'https://grepp-programmers-challenges.s3.ap-northeast-2.amazonaws.com/2020-birdview'
 
@@ -49,39 +52,39 @@ class Item(TimeStampedModel):
 
     @property
     def ingredient_score_of_oily_skin(self) -> int:
-        ingredient_score = 0
+        ingredient_score_oily = 0
         for ingredient in self.ingredient_set.all():
             if ingredient.oily == Ingredient.EffectBySkinType.beneficial:
-                ingredient_score += 1
+                ingredient_score_oily += 1
             elif ingredient.oily == Ingredient.EffectBySkinType.harmful:
-                ingredient_score -= 1
+                ingredient_score_oily -= 1
             else:
                 pass
-        return ingredient_score
+        return ingredient_score_oily
 
     @property
     def ingredient_score_of_dry_skin(self) -> int:
-        ingredient_score = 0
+        ingredient_score_dry = 0
         for ingredient in self.ingredient_set.all():
             if ingredient.dry == Ingredient.EffectBySkinType.beneficial:
-                ingredient_score += 1
+                ingredient_score_dry += 1
             elif ingredient.dry == Ingredient.EffectBySkinType.harmful:
-                ingredient_score -= 1
+                ingredient_score_dry -= 1
             else:
                 pass
-        return ingredient_score
+        return ingredient_score_dry
 
     @property
     def ingredient_score_of_sensitive_skin(self) -> int:
-        ingredient_score = 0
+        ingredient_score_sensitive = 0
         for ingredient in self.ingredient_set.all():
             if ingredient.sensitive == Ingredient.EffectBySkinType.beneficial:
-                ingredient_score += 1
+                ingredient_score_sensitive += 1
             elif ingredient.sensitive == Ingredient.EffectBySkinType.harmful:
-                ingredient_score -= 1
+                ingredient_score_sensitive -= 1
             else:
                 pass
-        return ingredient_score
+        return ingredient_score_sensitive
 
 
 class Ingredient(TimeStampedModel):
