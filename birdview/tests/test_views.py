@@ -200,7 +200,7 @@ class ItemListViewsetTest(TestCase):
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)
 
-    def test_제외해야_하는_성분을_지정하면_제외하고_보여준다(self):
+    def test_제외해야_하는_성분들을_지정하면_모두_포함하지_않은_상품만_보여준다(self):
         sample_ingredient_1 = Ingredient.objects.create(
             name="foundation",
             oily="",
@@ -250,3 +250,48 @@ class ItemListViewsetTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.data['results'][0]['name'], sample_item_2.name)
+
+    def test_포함해야_하는_성분들을_지정하면_모두_포함하는_상품만_보여준다(self):
+        sample_ingredient_1 = Ingredient.objects.create(
+            name="foundation",
+            oily="",
+            dry="",
+            sensitive="O"
+        )
+        sample_ingredient_2 = Ingredient.objects.create(
+            name="jurisdiction",
+            oily="X",
+            dry="X",
+            sensitive="O"
+        )
+        sample_item_1 = Item.objects.create(
+            name='리더스 링클 콜라겐 마스크',
+            price=520,
+            image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
+            monthly_sales=5196,
+            category=Item.CategoryChoices.skincare
+        )
+        sample_item_2 = Item.objects.create(
+            name='이켈 녹차 울트라 하이드레이팅 에센스 마스크',
+            price=4640,
+            image_id='1d532a02-1d50-4760-8e61-32b88b2a2271',
+            monthly_sales=2405,
+            category=Item.CategoryChoices.basemakeup
+        )
+        sample_item_3 = Item.objects.create(
+            name='이켈 녹차 울트라 하이드레이팅 에센스 마스크2',
+            price=4640,
+            image_id='1d532a02-1d50-4760-8e61-32b88b2a22w71',
+            monthly_sales=2405,
+            category=Item.CategoryChoices.basemakeup
+        )
+        sample_item_1.ingredient_set.add(sample_ingredient_1)
+        sample_item_2.ingredient_set.add(sample_ingredient_2)
+        sample_item_3.ingredient_set.add(sample_ingredient_1)
+        sample_item_3.ingredient_set.add(sample_ingredient_2)
+
+        client = APIClient()
+        response = client.get('/products/?skin_type=oily&include_ingredient=foundation,jurisdiction')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['name'], sample_item_3.name)

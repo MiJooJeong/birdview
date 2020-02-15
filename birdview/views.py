@@ -1,5 +1,3 @@
-from rest_framework.response import Response
-
 from birdview.models import Item
 from birdview.serializers import ItemListSerializer
 from rest_framework import viewsets
@@ -29,9 +27,14 @@ class ItemViewSet(viewsets.ReadOnlyModelViewSet):
 
         exclude_ingredient = params.get('exclude_ingredient')
         if exclude_ingredient:
-            exclude_ingredient_list = exclude_ingredient.split(',')
-            for ingredient in exclude_ingredient_list:
+            exclude_ingredient_name_list = exclude_ingredient.split(',')
+            for ingredient in exclude_ingredient_name_list:
                 self.queryset = self.queryset.exclude(ingredient_set__name=ingredient)
 
+        include_ingredient = params.get('include_ingredient')
+        if include_ingredient:
+            include_ingredient_name_list = include_ingredient.split(',')
+            for ingredient in include_ingredient_name_list:
+                self.queryset = self.queryset.filter(ingredient_set__name=ingredient)
 
         return super().list(request, *args, **kwargs)
