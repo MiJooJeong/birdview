@@ -39,3 +39,11 @@ class ItemViewSet(viewsets.ReadOnlyModelViewSet):
                 self.queryset = self.queryset.filter(ingredient_set__name=ingredient)
 
         return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        self.serializer_class = ItemDetailSerializer
+        params = request.query_params
+        self.queryset = Item.objects.filter(id=kwargs['pk'])
+
+        return super().retrieve(request, *args, **kwargs)
+
