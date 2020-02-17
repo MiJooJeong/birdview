@@ -18,10 +18,10 @@ from django.urls import include
 from django.urls import path
 
 from birdview.views import ItemViewSet
-from rest_framework import routers
+from birdview import routers
 
-router = routers.DefaultRouter()
-router.register('products', ItemViewSet)
+router = routers.CustomReadOnlyRouter()
+router.register('product', ItemViewSet, 'product')
 
 
 urlpatterns = [
