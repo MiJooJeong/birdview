@@ -1,13 +1,14 @@
 from birdview.models import Item
+from birdview.serializers import ItemDetailSerializer
 from birdview.serializers import ItemListSerializer
 from rest_framework import viewsets
 
 
 class ItemViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Item.objects.all()
-    serializer_class = ItemListSerializer
 
     def list(self, request, *args, **kwargs):
+        self.serializer_class = ItemListSerializer
         params = request.query_params
         try:
             skin_type = params['skin_type']

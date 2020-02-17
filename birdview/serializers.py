@@ -10,3 +10,12 @@ class ItemListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ['id', 'imgUrl', 'name', 'price', 'ingredients', 'monthlySales']
+
+
+class ItemDetailSerializer(serializers.ModelSerializer):
+    imgUrl = serializers.CharField(source='full_image_url')
+    monthlySales = serializers.IntegerField(source='monthly_sales')
+
+    class Meta:
+        model = Item
+        fields = ['id', 'imgUrl', 'name', 'price', 'gender', 'category', 'ingredients', 'monthlySales']
