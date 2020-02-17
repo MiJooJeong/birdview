@@ -1,10 +1,16 @@
+from rest_framework import mixins
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+
 from birdview.models import Item
 from birdview.serializers import ItemDetailSerializer
 from birdview.serializers import ItemListSerializer
-from rest_framework import viewsets
 
 
-class ItemViewSet(viewsets.ReadOnlyModelViewSet):
+class ItemViewSet(mixins.ListModelMixin,
+                  GenericViewSet):
+    # class ItemViewSet(viewsets.ReadOnlyModelViewSet):
+
     queryset = Item.objects.all()
 
     def list(self, request, *args, **kwargs):
@@ -40,10 +46,10 @@ class ItemViewSet(viewsets.ReadOnlyModelViewSet):
 
         return super().list(request, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
+    def detail_with_recommends(self, request, *args, **kwargs):
         self.serializer_class = ItemDetailSerializer
         params = request.query_params
         self.queryset = Item.objects.filter(id=kwargs['pk'])
 
-        return super().retrieve(request, *args, **kwargs)
-
+        serializer = self.get_serializer(self.queryset, many=True)
+        return Response(serializer.data)

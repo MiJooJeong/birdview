@@ -13,7 +13,7 @@ class CustomReadOnlyRouter(SimpleRouter):
         ),
         Route(
             url=r'^{prefix}/{lookup}{trailing_slash}$',
-            mapping={'get': 'retrieve'},
+            mapping={'get': 'detail_with_recommends'},
             name='{basename}-detail',
             detail=True,
             initkwargs={'suffix': 'Detail'}
