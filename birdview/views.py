@@ -1,16 +1,13 @@
-from rest_framework import mixins
+from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
 from birdview.models import Item
 from birdview.serializers import ItemDetailSerializer
 from birdview.serializers import ItemListSerializer
+from birdview.serializers import RecommendItemsSerializer
 
 
-class ItemViewSet(mixins.ListModelMixin,
-                  GenericViewSet):
-    # class ItemViewSet(viewsets.ReadOnlyModelViewSet):
-
+class ItemViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Item.objects.all()
 
     def list(self, request, *args, **kwargs):
@@ -50,6 +47,26 @@ class ItemViewSet(mixins.ListModelMixin,
         self.serializer_class = ItemDetailSerializer
         params = request.query_params
         self.queryset = Item.objects.filter(id=kwargs['pk'])
+        try:
+            skin_type = params['skin_type']
+        except KeyError:
+            raise ValueError('Please enter skin type.')
+
+        category = self.queryset.first().category
+        recommend_items = None
+        if skin_type == 'oily':
+            recommend_items = Item.objects.filter(
+                category=category).order_by('-ingredient_score_oily', 'price')[:3]
+        elif skin_type == 'dry':
+            recommend_items = Item.objects.filter(
+                category=category).order_by('-ingredient_score_dry', 'price')[:3]
+        elif skin_type == 'sensitive':
+            recommend_items = Item.objects.filter(
+                category=category).order_by('-ingredient_score_sensitive', 'price')[:3]
 
         serializer = self.get_serializer(self.queryset, many=True)
-        return Response(serializer.data)
+        recommend_items_serializer = RecommendItemsSerializer(recommend_items, many=True)
+        if recommend_items:
+            return Response(serializer.data + recommend_items_serializer.data)
+        else:
+            return Response(serializer.data)

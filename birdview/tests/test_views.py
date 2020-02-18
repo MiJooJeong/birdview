@@ -316,7 +316,6 @@ class ItemListViewsetTest(TestCase):
         client = APIClient()
         response = client.get('/product/{}/?skin_type=oily'.format(sample_item.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
         self.assertEqual(
             response.data[0],
             {
@@ -330,3 +329,94 @@ class ItemListViewsetTest(TestCase):
                 "monthlySales": sample_item.monthly_sales
             }
         )
+
+    def test_product_id에_해당하는_상품과_같은_카테고리의_상위_3개의_추천_상품_정보를_조회한다(self):
+        sample_item_1 = Item.objects.create(
+            name='리더스 링클 콜라겐 마스크',
+            price=520,
+            image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
+            monthly_sales=5196,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all
+        )
+        sample_item_2 = Item.objects.create(
+            name='이켈 녹차 울트라 하이드레이팅 에센스 마스크',
+            price=4640,
+            image_id='1d532a02-1d50-4760-8e61-32b88b2a2270',
+            monthly_sales=2405,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all,
+            ingredient_score_oily=5
+        )
+        sample_item_3 = Item.objects.create(
+            name='자연마을 어성초 마스크 팩',
+            price=1780,
+            image_id='824b6b31-4590-4b54-8793-5c808a024398',
+            monthly_sales=5023,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all,
+            ingredient_score_oily=16
+        )
+        sample_item_4 = Item.objects.create(
+            name='오릭스 포 맨 컨트롤 스킨 410ml',
+            price=1440,
+            image_id='2119924f-75ce-48dc-8a2d-ee71545d6700',
+            monthly_sales=1994,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all,
+            ingredient_score_oily=10
+        )
+        sample_item_5 = Item.objects.create(
+            name='겔랑 테라코타 썸머 글로우 하이라이터 10g',
+            price=54840,
+            image_id='1647f43c-2919-4cbf-9de4-b56a4817779d',
+            monthly_sales=2541,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all,
+            ingredient_score_oily=20
+        )
+        sample_item_6 = Item.objects.create(
+            name='아모레퍼시픽 설화수 설린에센스 50ml',
+            price=70660,
+            image_id='8e7a54f7-93a6-4572-b6e0-cdd818e4cbd8',
+            monthly_sales=3723,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all,
+            ingredient_score_oily=12
+        )
+        sample_ingredient = Ingredient.objects.create(
+            name="foundation",
+            oily="",
+            dry="",
+            sensitive="O"
+        )
+        sample_item_1.ingredient_set.add(sample_ingredient)
+
+        client = APIClient()
+        response = client.get('/product/{}/?skin_type=oily'.format(sample_item_1.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
+        self.assertEqual(
+            response.data[0],
+            {
+                "id": sample_item_1.id,
+                "imgUrl": sample_item_1.full_image_url,
+                "name": sample_item_1.name,
+                "price": sample_item_1.price,
+                "gender": sample_item_1.gender,
+                "category": sample_item_1.category,
+                "ingredients": sample_item_1.ingredients,
+                "monthlySales": sample_item_1.monthly_sales
+            }
+        )
+        self.assertEqual(
+            response.data[1],
+            {
+                "id": sample_item_5.id,
+                "imgUrl": sample_item_5.thumbnail_image_url,
+                "name": sample_item_5.name,
+                "price": sample_item_5.price
+            }
+        )
+        self.assertEqual(response.data[2]['name'], sample_item_3.name)
+        self.assertEqual(response.data[3]['name'], sample_item_6.name)
