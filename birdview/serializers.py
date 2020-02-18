@@ -19,3 +19,11 @@ class ItemDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ['id', 'imgUrl', 'name', 'price', 'gender', 'category', 'ingredients', 'monthlySales']
+
+
+class RecommendItemsSerializer(serializers.ModelSerializer):
+    imgUrl = serializers.CharField(source='thumbnail_image_url')
+
+    class Meta:
+        model = Item
+        fields = ['id', 'imgUrl', 'name', 'price']
