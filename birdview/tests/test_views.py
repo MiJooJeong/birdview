@@ -291,7 +291,42 @@ class ItemListViewsetTest(TestCase):
         sample_item_3.ingredient_set.add(sample_ingredient_2)
 
         client = APIClient()
-        response = client.get('/products/?skin_type=oily&include_ingredient=foundation,jurisdiction')
+        response = client.get('/products/?skin_type=oily&include_ingredient=foundation,jurisdiction', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 1)
         self.assertEqual(response.data['results'][0]['name'], sample_item_3.name)
+
+    def test_product_id에_해당하는_상품을_가져온다(self):
+        sample_item = Item.objects.create(
+            name='리더스 링클 콜라겐 마스크',
+            price=520,
+            image_id='a18de8cd-c730-4f36-b16f-665cca908c11',
+            monthly_sales=5196,
+            category=Item.CategoryChoices.skincare,
+            gender=Item.GenderChoices.all
+        )
+        sample_ingredient = Ingredient.objects.create(
+            name="foundation",
+            oily="",
+            dry="",
+            sensitive="O"
+        )
+        sample_item.ingredient_set.add(sample_ingredient)
+
+        client = APIClient()
+        response = client.get('/product/{}/?skin_type=oily'.format(sample_item.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            response.data[0],
+            {
+                "id": sample_item.id,
+                "imgUrl": sample_item.full_image_url,
+                "name": sample_item.name,
+                "price": sample_item.price,
+                "gender": sample_item.gender,
+                "category": sample_item.category,
+                "ingredients": sample_item.ingredients,
+                "monthlySales": sample_item.monthly_sales
+            }
+        )
