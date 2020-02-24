@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.db.models import Model
 from django.db.models.signals import m2m_changed
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_extensions.db.models import TimeStampedModel
 from djchoices import ChoiceItem
@@ -97,3 +98,13 @@ def item_ingredients_changed(sender, **kwargs):
     item = kwargs.pop('instance', None)
     recalculated_ingredient_score_of_skin_type(item)
 
+
+@receiver(post_save, sender=Ingredient)
+def ingredient_changed(sender, **kwargs):
+    """
+    성분의 속성이 변할때 해당 성분을 가진 상품의 성분 점수를 다시 계산
+    :param kwargs: https://docs.djangoproject.com/en/2.2/ref/signals/#m2m-changed 참고
+    """
+    ingredient = kwargs.pop('instance', None)
+    for i, item in enumerate(ingredient.items.all()):
+        recalculated_ingredient_score_of_skin_type(item)
