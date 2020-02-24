@@ -1,8 +1,10 @@
 import os
 
 from django.db import models
+from django.db.models import Model
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 from django_extensions.db.models import TimeStampedModel
-
 from djchoices import ChoiceItem
 from djchoices import DjangoChoices
 
@@ -49,41 +51,21 @@ class Item(TimeStampedModel):
         # TODO - serializer 설정으로 가능한지 확인 필요
         return ','.join(self.ingredient_set.all().values_list('name', flat=True))
 
-    @property
-    def ingredient_score_of_oily_skin(self) -> int:
-        ingredient_score_oily = 0
+    def calculate_ingredient_score_of_skin_type(self, skin_type: str) -> int:
+        """
+        피부 타입별로 성분 점수를 계산한다
+        :param skin_type: ['oily', 'dry', 'sensitive']
+        :return: 성분 점수
+        """
+        ingredient_score = 0
         for ingredient in self.ingredient_set.all():
-            if ingredient.oily == Ingredient.EffectBySkinType.beneficial:
-                ingredient_score_oily += 1
-            elif ingredient.oily == Ingredient.EffectBySkinType.harmful:
-                ingredient_score_oily -= 1
+            if getattr(ingredient, skin_type) == Ingredient.EffectBySkinType.beneficial:
+                ingredient_score += 1
+            elif getattr(ingredient, skin_type) == Ingredient.EffectBySkinType.harmful:
+                ingredient_score -= 1
             else:
                 pass
-        return ingredient_score_oily
-
-    @property
-    def ingredient_score_of_dry_skin(self) -> int:
-        ingredient_score_dry = 0
-        for ingredient in self.ingredient_set.all():
-            if ingredient.dry == Ingredient.EffectBySkinType.beneficial:
-                ingredient_score_dry += 1
-            elif ingredient.dry == Ingredient.EffectBySkinType.harmful:
-                ingredient_score_dry -= 1
-            else:
-                pass
-        return ingredient_score_dry
-
-    @property
-    def ingredient_score_of_sensitive_skin(self) -> int:
-        ingredient_score_sensitive = 0
-        for ingredient in self.ingredient_set.all():
-            if ingredient.sensitive == Ingredient.EffectBySkinType.beneficial:
-                ingredient_score_sensitive += 1
-            elif ingredient.sensitive == Ingredient.EffectBySkinType.harmful:
-                ingredient_score_sensitive -= 1
-            else:
-                pass
-        return ingredient_score_sensitive
+        return ingredient_score
 
 
 class Ingredient(TimeStampedModel):
@@ -96,3 +78,22 @@ class Ingredient(TimeStampedModel):
     oily = models.CharField('지성 영향', max_length=1, choices=EffectBySkinType.choices)
     dry = models.CharField('건성 영향', max_length=1, choices=EffectBySkinType.choices)
     sensitive = models.CharField('민감성 영향', max_length=1, choices=EffectBySkinType.choices)
+
+
+def recalculated_ingredient_score_of_skin_type(item: Item):
+    """상품의 성분 점수 다시 계산"""
+    item.ingredient_score_oily = item.calculate_ingredient_score_of_skin_type('oily')
+    item.ingredient_score_dry = item.calculate_ingredient_score_of_skin_type('dry')
+    item.ingredient_score_sensitive = item.calculate_ingredient_score_of_skin_type('sensitive')
+    item.save()
+
+
+@receiver(m2m_changed, sender=Item.ingredient_set.through)
+def item_ingredients_changed(sender, **kwargs):
+    """
+    상품의 성분이 변동될 때 마다 각 피부 타입별 성분 점수를 계산
+    :param kwargs: https://docs.djangoproject.com/en/2.2/ref/signals/#m2m-changed 참고
+    """
+    item = kwargs.pop('instance', None)
+    recalculated_ingredient_score_of_skin_type(item)
+

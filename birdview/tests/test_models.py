@@ -47,17 +47,17 @@ class ItemModelTestCase(TestCase):
             'https://grepp-programmers-challenges.s3.ap-northeast-2.amazonaws.com/2020-birdview/thumbnail/a18de8cd-c730-4f36-b16f-665cca908c11.jpg'
         )
 
-    def test_calculate_ingredient_score_of_oily_skin(self):
+    def test_ingredient_score_oily(self):
         self.assertEqual(
-            self.sample_item.ingredient_score_of_oily_skin, -1
+            self.sample_item.ingredient_score_oily, -1
         )
 
-    def test_calculate_ingredient_score_of_dry_skin(self):
+    def test_ingredient_score_dry(self):
         self.assertEqual(
-            self.sample_item.ingredient_score_of_dry_skin, 0
+            self.sample_item.ingredient_score_dry, 0
         )
 
-    def test_calculate_ingredient_score_of_sensitive_skin(self):
+    def test_ingredient_score_sensitive(self):
         self.assertEqual(
-            self.sample_item.ingredient_score_of_sensitive_skin, 2
+            self.sample_item.ingredient_score_sensitive, 2
         )
