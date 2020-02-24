@@ -23,13 +23,12 @@ class Item(TimeStampedModel):
     price = models.PositiveIntegerField('가격', default=0)
     image_id = models.CharField('상품 이미지 id', max_length=100, unique=True)
     gender = models.CharField('성별', max_length=6, choices=GenderChoices.choices)
-    category = models.CharField('카테고리', max_length=10, choices=CategoryChoices.choices)
-    # TODO - Ingredients 모델 생성 후, FK 설정
+    category = models.CharField('카테고리', max_length=10, choices=CategoryChoices.choices, db_index=True)
     ingredient_set = models.ManyToManyField('Ingredient', related_name='items')
-    monthly_sales = models.PositiveIntegerField('이번달 판매 수량', default=0)
-    ingredient_score_oily = models.IntegerField('지성 피부 성분 점수', default=0)
-    ingredient_score_dry = models.IntegerField('지성 피부 성분 점수', default=0)
-    ingredient_score_sensitive = models.IntegerField('지성 피부 성분 점수', default=0)
+    monthly_sales = models.PositiveIntegerField('이번달 판매 수량', default=None, blank=True, null=True)
+    ingredient_score_oily = models.IntegerField('지성 피부 성분 점수', default=None, blank=True, null=True)
+    ingredient_score_dry = models.IntegerField('건성 피부 성분 점수', default=None, blank=True, null=True)
+    ingredient_score_sensitive = models.IntegerField('민감성 피부 성분 점수', default=None, blank=True, null=True)
 
     IMAGE_BASE_URL = 'https://grepp-programmers-challenges.s3.ap-northeast-2.amazonaws.com/2020-birdview'
 
